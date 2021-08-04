@@ -1,0 +1,81 @@
+clc; clear; close all;
+load 'yalefaces.mat'.
+flattenM = reshape(M, [1024, 2414]);
+% every colunm in avgFace is the ith image in the dataset
+% avgFace = zeros(1024, 2414);
+avgg = 0;
+for i = 1:2414
+    sum = 0;
+    for j = 1:1024
+        sum = sum + 1;
+        % x bar
+        % avgFace(i, :) = (1/1024)*sum*flattenM(i,:);
+        avgg = (1/1024)*sum*flattenM(j,i);
+    end
+end
+% The centred image vectors 
+centredIm = zeros(1024, 2414);
+for i = 1:1024
+    centredIm(i,:) = flattenM(i,:) - avgg;
+end
+% Covariance Matrix
+covM = zeros(1024,1024);
+T = transpose(centredIm);
+covM = centredIm*T;
+
+% part a
+% find the svd of X
+% U are the left singular vectors
+% S are the singular values
+[U,S,V] = svd(centredIm);
+
+% Recall from part a left singular values of X are the eigenvectors of C
+% from part a we know eigenvalues of C are the dquared singular values of X
+D = S.^2;
+lamda = diag(D);
+
+% find the 10 smallest eigenvalues
+[sortedX, sortedInds] = sort(lamda(:),'descend');
+top10_indx = sortedInds(1:10);
+top10_eigvals = sortedX(1:10);
+
+% find the corresponding eigenvalue
+eigVec_max = U(:, top10_indx(1));
+topVec = reshape(eigVec_max, [32, 32]);
+ imshow(topVec/max(eigVec_max))
+
+
+% % Spectral Decompostion of Covariance Matrix
+% % V : right eigenvectors
+% % D : are the eigenvalues
+% % W : left eigenvectors
+% [V,D,W] = eig(covM);
+% lamda = diag(D);
+% 
+% % % find the 10 largest eigenvalues
+% % [sortedX, sortedInds] = sort(lamda(:),'descend');
+% % top10_indx = sortedInds(1:10);
+% % top10_eigvals = sortedX(1:10);
+% % 
+% % eigVec_max = V(:, top10_indx(10));
+% % topVec = reshape(eigVec_max, [32, 32]);
+% % imshow(topVec/max(eigVec_max))
+
+
+% row reference
+% [i, j] = ind2sub(size(lamda), top10_indx);
+% % set of eigenvectors of b form the basis for the centred image
+% % reshaping top 10 colunm vectors of V 
+% topVec = zeros(32,32);
+% % grid on
+% for i=1:10
+%     eigVec_max = V(:, top10_indx(i));
+%     topVec = reshape(eigVec_max, [32, 32]);
+%     imshow(topVec/max(eigVec_max))
+%     hold on      
+% end
+%     plot(1:32, topVec, '--','MarkerSize', 24,'color', 'blue')
+% topVec1 = reshape(V(:,1024), [32, 32]);
+% topVec2 = reshape(V(:,1023), [32, 32]);
+% topVec3 = reshape(V(:,1022), [32, 32]);
+% topVec4 = reshape(V(:,1021), [32, 32]);
